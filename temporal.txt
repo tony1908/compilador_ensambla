@@ -1,0 +1,496 @@
+**********************************
+*PROGRAMA DE EJEMPLO
+**********************************
+PACTL EQU $1026
+PACNT EQU $1027
+ADCTL EQU $1030
+ADR1 EQU $1031
+ADR2 EQU $1032
+ADR3 EQU $1033
+ADR4 EQU $1034
+OPTION EQU $1039
+
+PORTA EQU $1000
+PORTD EQU $1008
+PORTE EQU $100A
+PORTG EQU $1002
+
+DDRA EQU $1001
+DDRD EQU $1009
+DDRG EQU $1003
+
+TMSK2 EQU $1024
+TFLG2 EQU $1025
+
+SCDR EQU $102F
+SCCR2 EQU $102D
+SCSR EQU $102E
+SCCR1 EQU $102C
+BAUD EQU $102B
+HPRIO EQU $103C
+SPCR EQU $1028
+CSCTL EQU $105D
+OPT2 EQU $1038
+
+* VARIABLES *********************
+
+ORDEN EQU $000C
+SEG EQU $000D
+U1 EQU $000E
+U2 EQU $000F
+U3 EQU $0010
+U4 EQU $0011
+U5 EQU $0012
+V1 EQU $0013
+V2 EQU $0014
+BAS_H EQU $0015
+BAS_L EQU $0016
+V5 EQU $0017
+TEMPO EQU $0018
+ALTO EQU $0019
+BAJO EQU $001A
+BASE_H EQU $001B
+BASE_L EQU $001C
+V3 EQU $001D
+V4 EQU $001E
+
+**********************************
+*CONFIGURA REGISTROS
+**********************************
+ORG $8000
+LDS #$03FF
+
+
+LDAA #$00
+STAA $1001
+
+LDAA #$FF
+STAA $1003
+
+LDAA #$00
+STAA $1002
+
+LDD #$302C
+STAA $102B
+STAB $102D
+LDAA #$00
+STAA $102C
+
+LDAA #$FE
+STAA $1009
+
+
+LDAA #$04
+STAA $103C
+
+LDAA #$00
+TAP
+
+
+
+
+
+
+
+**********************************
+*PROGRAMA PRINCIPAL
+**********************************
+MAIN
+JSR INICIA
+LDAA #$3F
+STAA $000C
+
+
+CICLO
+LDAA $000D
+BEQ CICLO
+CLR $000D
+
+LDAA $1027
+STAA $0017
+CLR $1027
+
+
+JSR DATARX
+DEY
+XGDY
+STAA $0019
+STAB $001A
+XGDY
+LDAA $0019
+LDAB $001A
+JSR BINBCD
+JSR DISPLAY
+JSR COMA
+JSR VOLTA
+
+CLRA
+LDAB $0013
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+CLRA
+LDAB $0014
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+CLRA
+LDAB $001D
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+CLRA
+LDAB $001E
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+CLRA
+LDAB $0017
+JSR BNBCD
+JSR DSPLY
+
+JSR CRYTRN
+
+JMP CICLO
+
+
+***********************************
+* INICIA
+***********************************
+INICIA
+
+CLR $000D
+
+CLR $1002
+LDAA #$F4
+STAA $0018
+
+LDX #$1024
+BSET $00,X,#$40
+CLI
+
+LDX #$1026
+BSET $00,X,#$50
+CLR $1027
+
+LDAA #$10
+STAA $001B
+LDAA #$60
+STAA $001C
+
+LDY #$1060
+
+LDAA #$16
+STAA $0015
+LDAA #$53
+STAA $0016
+
+
+CLR $0019
+CLR $001A
+
+RTS
+***********************************
+* SACA
+***********************************
+SACA
+
+
+LDAA $0019
+LDAB $001A
+XGDY
+INY
+XGDY
+JSR BINBCD
+JSR DISPLAY
+JSR COMA
+
+LDAA $001B
+LDAB $001C
+XGDY
+
+INY
+CLRA
+LDAB $00,Y
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+INY
+CLRA
+LDAB $00,Y
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+INY
+CLRA
+LDAB $00,Y
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+INY
+CLRA
+LDAB $00,Y
+JSR BNBCD
+JSR DSPLY
+JSR COMA
+
+INY
+CLRA
+LDAB $00,Y
+JSR BNBCD
+JSR DSPLY
+
+XGDY
+STAA $001B
+STAB $001C
+
+JSR CRYTRN
+
+RTS
+***********************************
+* COMA
+***********************************
+COMA
+LDX #$102E
+
+LDAA $102E
+LDAA #$2C
+STAA $102F
+C1
+BRCLR $00,X,#$80 C1
+RTS
+***********************************
+* DESPLIEGA
+***********************************
+DISPLAY
+
+LDX #$102E
+
+LDAA $102E
+LDAA $000E
+ADDA #$30
+STAA $102F
+T1
+BRCLR $00,X,#$80 T1
+
+LDAA $102E
+LDAA $000F
+ADDA #$30
+STAA $102F
+T2
+BRCLR $00,X,#$80 T2
+
+DSPLY
+LDX #$102E
+
+LDAA $102E
+LDAA $0010
+ADDA #$30
+STAA $102F
+T3
+BRCLR $00,X,#$80 T3
+
+LDAA $102E
+LDAA $0011
+ADDA #$30
+STAA $102F
+T4
+BRCLR $00,X,#$80 T4
+
+LDAA $102E
+LDAA $0012
+ADDA #$30
+STAA $102F
+T5
+BRCLR $00,X,#$80 T5
+
+RTS
+
+***********************************
+* CARRY RETURN
+***********************************
+
+CRYTRN
+LDX #$102E
+LDAA $102E
+LDAA #$0A
+STAA $102F
+CR1
+BRCLR $00,X,#$80 CR1
+
+LDAA $102E
+LDAA #$0D
+STAA $102F
+CR2
+BRCLR $00,X,#$80 CR2
+
+RTS
+***********************************
+* DESPLIEGUE DE DATO RECIBIDO
+***********************************
+
+DATARX
+LDX #$102E
+LDAA $102E
+LDAA $000C
+STAA $102F
+DT1
+BRCLR $00,X,#$80 DT1
+
+LDAA $102E
+LDAA #$3A
+STAA $102F
+DT2
+BRCLR $00,X,#$80 DT2
+
+RTS
+***********************************
+* voltimetro
+***********************************
+VOLTA
+LDX #$1030
+
+LDAA #$80
+STAA $1039
+
+LDAA #$10
+STAA $1030
+
+E1
+BRCLR $00,X,#$80 E1
+LDAB $1031
+STAB $0013
+
+LDAA #$80
+STAA $1039
+
+LDAA #$11
+STAA $1030
+
+E2
+BRCLR $00,X,#$80 E2
+LDAB $1032
+STAB $0014
+
+LDAA #$12
+STAA $1030
+
+E3
+BRCLR $00,X,#$80 E3
+LDAB $1033
+STAB $001D
+
+LDAA #$13
+STAA $1030
+
+E4
+BRCLR $00,X,#$80 E4
+LDAB $1034
+STAB $001E
+
+
+RTS
+***********************************
+* CONVIERTE A BCD
+***********************************
+
+BINBCD
+
+LDX #$2710
+IDIV
+XGDX
+STAB $000E
+XGDX
+LDX #$3E8
+IDIV
+XGDX
+STAB $000F
+XGDX
+
+BNBCD
+LDX #$64
+IDIV
+XGDX
+STAB $0010
+XGDX
+LDX #$A
+IDIV
+XGDX
+STAB $0011
+XGDX
+STAB $0012
+
+
+
+RTS
+
+
+
+***********************************
+* ATENCION A INTERRUPCION SERIAL
+***********************************
+ORG $F100
+
+PSHA
+
+LDAA $102E
+LDAA $102F
+STAA $000C
+
+PULA
+
+RTI
+
+***********************************
+* ATENCION A INTERRUPCION REAL TIME
+***********************************
+ORG $F110
+
+PSHA
+PSHX
+
+LDX #$1025
+BSET $00,X,#$40
+DEC $0018
+BEQ $000D
+
+PULA
+PULX
+RTI
+
+SEGUNDO
+LDAA #$FF
+STAA $000D
+LDAA #$F4
+STAA $0018
+INC $1002
+
+PULA
+PULX
+RTI
+***********************************
+* VECTOR INTERRUPCION SERIAL
+***********************************
+ORG $FFD6
+FCB $F1,$00
+
+***********************************
+* VECTOR INTERRUPCION REAL TIME
+***********************************
+ORG $FFF0
+FCB $F1,$10
+
+***********************************
+*RESET
+***********************************
+ORG $FFFE
+RESET FCB $80,$00
+***********************************
+END $8000
